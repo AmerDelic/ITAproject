@@ -1,35 +1,52 @@
 package com.itacademy.AttendanceApp.service;
 
 import com.itacademy.AttendanceApp.entity.TimeEntry;
+import com.itacademy.AttendanceApp.entity.User;
+import com.itacademy.AttendanceApp.exception.ClockOutException;
 import com.itacademy.AttendanceApp.repository.TimeEntryRepository;
-import jakarta.transaction.Transactional;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+
+import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 
 
 @Service
-@Transactional
+@RequiredArgsConstructor
+@Getter
 public class TimeEntryService {
 
-
-    @Autowired
-    private TimeEntryRepository timeEntryRepository;
+    private final TimeEntryRepository timeEntryRepository;
 
     public List<TimeEntry> getAllTimeEntry() {
         return timeEntryRepository.findAll();
     }
 
-    public TimeEntry saveTimeEntry(TimeEntry timeEntry) {
+    public TimeEntry clockIn(User user) {
+        TimeEntry timeEntry = new TimeEntry();
+        timeEntry.setUser(user);
+        timeEntry.setClocksIn(ZonedDateTime.now());
+        return timeEntryRepository.save(timeEntry);
+    }
+
+    public TimeEntry clockOut(User user) {
+        TimeEntry timeEntry = timeEntryRepository.findLatestByUser(user);
+        if (timeEntry.getClocksOut() != null) {
+            throw new ClockOutException("You need to clock IN first");
+        }
+        timeEntry.setClocksOut(ZonedDateTime.now());
         return timeEntryRepository.save(timeEntry);
     }
 
 
-    public TimeEntry getByUser(String username) {
-        return timeEntryRepository.findAllByUser(username);
+    public List<TimeEntry> getByUser(User user) {
+        return timeEntryRepository.findAllByUser(user);
     }
 
+    public List<TimeEntry> getByUserInPeriod(User user, ZonedDateTime from, ZonedDateTime to) {
+        return timeEntryRepository.findByUserAndClocksInBetween(user, from, to);
+    }
 
 
     public String deleteRow(Integer id) {
@@ -37,21 +54,9 @@ public class TimeEntryService {
         return "Success";
     }
 
-    public TimeEntry getById(Integer id) {
-        Optional<TimeEntry> optional = timeEntryRepository.findById(id);
-        TimeEntry timeEntry = optional.get();
-        return timeEntry;
-
-    }
-
-    public List<TimeEntry> findAllTimeEntry(){
-        return timeEntryRepository.findAll();
-    }
-
-    public void save(TimeEntry timeEntry){
+    public void save(TimeEntry timeEntry) {
         timeEntryRepository.save(timeEntry);
     }
-
 
 
 }

@@ -1,23 +1,25 @@
 package com.itacademy.AttendanceApp.service;
 
 import com.itacademy.AttendanceApp.entity.User;
+import com.itacademy.AttendanceApp.exception.UserNotFoundException;
 import com.itacademy.AttendanceApp.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
 
 @Service
-@RequiredArgsConstructor
+@Getter
+@Setter
 public class UserService {
 
     private final UserRepository userRepository;
 
-//   // public UserService(UserRepository userRepository) {
-//        this.userRepository = userRepository;
-//    }
+    public UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
 
     public List<User> getAllUsers() {
         return userRepository.findAll();
@@ -27,13 +29,18 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() -> new UserNotFoundException(String.format("User [%s] not found", username)));
+    }
+
     public User updateUser(User user) {
         User updateResponse = userRepository.save(user);
         return updateResponse;
     }
 
     public User findById(Long id) throws IOException {
-        return userRepository.findById(id).orElseThrow(() -> new IOException("Nema usera"));
+        return userRepository.findById(id).orElseThrow(() -> new IOException(String.format("User of id=[%s] not found", id)));
     }
 
     public void deleteUser(Long id) {

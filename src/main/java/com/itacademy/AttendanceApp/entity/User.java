@@ -1,64 +1,45 @@
 package com.itacademy.AttendanceApp.entity;
 
 
-
-import jakarta.persistence.*;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
+import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-import lombok.Data;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
 import java.io.Serializable;
-import java.util.List;
 import java.util.Objects;
 
 @Entity
-@Data
-@Table(name = "users", schema = "attendanceapp")
+@Getter
+@Setter
+@NoArgsConstructor
+@Table(name = "user", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"username"}),
+        @UniqueConstraint(columnNames = {"email"})
+})
 public class User implements Serializable {
     @Id
-    @Basic(optional = false)
-    @Column(name = "user_id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Basic(optional = false)
-    @Column(name = "jmbg", unique = true)
     private Integer jmbg;
-
-    @Basic(optional = false)
-    @Column(name = "username")
-    @Valid
     @NotBlank
     private String username;
-
-    @Column(name = "password")
     @NotBlank
     private String password;
-
-    @Basic(optional = false)
-    @Column(name = "role")
-    private String role;
-
-    @Basic(optional = false)
-    @Column(name = "isActive")
-    private String isActive;
-
-    @Basic(optional = false)
-    @Column(name = "first_name")
+    @NotBlank(message = "Must specify role")
+    private String role = "user";
+    private Boolean isActive = true;
     private String firstName;
-
-    @Basic(optional = false)
-    @Column(name = "last_name")
     private String lastName;
-
-    @Basic(optional = false)
-    @Column(name = "email")
+    @Email
     private String email;
-
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
-    private List<TimeEntry> timeEntries;
 
     @Override
     public boolean equals(Object o) {
