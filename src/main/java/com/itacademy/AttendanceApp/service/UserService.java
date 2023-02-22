@@ -5,6 +5,7 @@ import com.itacademy.AttendanceApp.exception.UserNotFoundException;
 import com.itacademy.AttendanceApp.repository.UserRepository;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -31,7 +32,8 @@ public class UserService {
 
     public User findByUsername(String username) {
         return userRepository.findByUsername(username)
-                .orElseThrow(() -> new UserNotFoundException(String.format("User [%s] not found", username)));
+//                .orElseThrow(() -> new UserNotFoundException(String.format("User [%s] not found", username)));
+                .orElseThrow(() -> new UsernameNotFoundException(String.format("User [%s] not found", username)));
     }
 
     public User updateUser(User user) {

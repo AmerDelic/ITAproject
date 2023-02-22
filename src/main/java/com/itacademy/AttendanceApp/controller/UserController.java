@@ -16,7 +16,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.List;
 
 @RestController
@@ -40,9 +39,9 @@ public class UserController {
         return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/{username}")
     @PreAuthorize("hasAuthority('admin')")
-    public ResponseEntity<User> findById(@PathVariable("id") Long id) throws IOException {
-        return ResponseEntity.ok(userService.findById(id));
+    public ResponseEntity<User> findById(@PathVariable("username") String username) {
+        return ResponseEntity.ok(userService.findByUsername(username));
     }
 }
