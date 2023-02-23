@@ -4,16 +4,19 @@ import com.itacademy.AttendanceApp.dto.TimeEntryMapper;
 import com.itacademy.AttendanceApp.dto.TimeEntryResponseDto;
 import com.itacademy.AttendanceApp.entity.TimeEntry;
 import com.itacademy.AttendanceApp.entity.User;
+import com.itacademy.AttendanceApp.security.SecurityUtils;
 import com.itacademy.AttendanceApp.service.TimeEntryService;
 import com.itacademy.AttendanceApp.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -52,6 +55,20 @@ public class TimeEntryController {
     @GetMapping("/{username}")
     @PreAuthorize("hasAuthority('admin')")
     public ResponseEntity<List<TimeEntryResponseDto>> getAllByUsername(@PathVariable("username") String username) {
+        User user = userService.findByUsername(username);
+        List<TimeEntry> resultsList = timeEntryService.getByUser(user);
+        List<TimeEntryResponseDto> resultDtoList = resultsList.stream()
+                .map(entryMapper::entityToResponseDto)
+                .toList();
+        return new ResponseEntity<>(resultDtoList, HttpStatus.OK);
+    }
+
+    @GetMapping
+    @PreAuthorize("hasAnyAuthority('user','admin')")
+    public ResponseEntity<List<TimeEntryResponseDto>> getAllByAuthenticatedUser(
+            @RequestHeader(HttpHeaders.AUTHORIZATION) String authorization
+    ) {
+        String username = SecurityUtils.getUsername(authorization);
         User user = userService.findByUsername(username);
         List<TimeEntry> resultsList = timeEntryService.getByUser(user);
         List<TimeEntryResponseDto> resultDtoList = resultsList.stream()
